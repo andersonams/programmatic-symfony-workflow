@@ -1,0 +1,34 @@
+{% extends 'translation/layout.html.twig' %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-6">
+            <h1>Translation list</h1>
+            <ul class="list-unstyled">
+                {% for translation in translations %}
+                    <li>
+                        <a href="{{ path('translation_show', {id: translation.id}) }}">
+                            {{ translation.title }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <p>
+                            No translation found, add one?
+                        </p>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2>Add new translation</h2>
+            <form action="{{ path('translation_create') }}" method="post"  class="form-inline">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" value="{{ translations ? "translations #{(translations|length) + 1}" : "My first translation" }}" class="form-control" />
+                </div>
+                <button type="submit"  class="btn btn-default">create</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

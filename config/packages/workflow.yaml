@@ -1,0 +1,255 @@
+framework:
+    workflows:
+        translation:
+            type: workflow
+            marking_store:
+                type: method
+            supports:
+                - App\Entity\Translation
+            places:
+                translation: ~
+                proofreading_lsp: ~
+                proofreading_qm: ~
+                customer_approval: ~
+                shipping: ~
+            transitions:
+                to_proofreading:
+                    from: translation
+                    to:
+                        - proofreading_lsp
+                        - proofreading_qm
+                to_customer_approval:
+                    from:
+                        - proofreading_lsp
+                        - proofreading_qm
+                    to:
+                        - customer_approval
+                    metadata:
+                        title: Proceed to customer approval
+                to_reject:
+                    from: customer_approval
+                    to:
+                        - proofreading_lsp
+                        - proofreading_qm
+                to_shippment:
+                    from: customer_approval
+                    to: shipping
+                    metadata:
+                        title: Shippment to customer
+            metadata:
+                title: Translation Process Workflow
+            audit_trail: true
+            # events_to_dispatch: ~
+            # events_to_dispatch: []
+            # events_to_dispatch: ['workflow.enter']
+
+        article:
+            type: workflow
+            marking_store:
+                type: method
+            supports:
+                - App\Entity\Article
+            places:
+                draft:
+                    metadata:
+                        title: Draft
+                waiting for journalist:
+                    metadata:
+                        title: Waiting for Journalist review
+                approved by journalist:
+                    metadata:
+                        title: Approved By Journalist
+                wait for spellchecker:
+                    metadata:
+                        title: Waiting for Spellchecker review
+                approved by spellchecker:
+                    metadata:
+                        title: Approved By Spellchecker
+                published: ~
+            transitions:
+                request review:
+                    guard: "is_fully_authenticated()"
+                    from: draft
+                    to:
+                        - waiting for journalist
+                        - wait for spellchecker
+                    metadata:
+                        title: Do you want a Review?
+                journalist approval:
+                    guard: "is_granted('ROLE_JOURNALIST')"
+                    from: waiting for journalist
+                    to: approved by journalist
+                    metadata:
+                        title: Do you valid the article?
+                spellchecker approval:
+                    guard: "is_fully_authenticated() and is_granted('ROLE_SPELLCHECKER')"
+                    from: wait for spellchecker
+                    to: approved by spellchecker
+                    metadata:
+                        title: Do you valid the spell check?
+                publish:
+                    guard: "is_fully_authenticated()"
+                    from:
+                        - approved by journalist
+                        - approved by spellchecker
+                    to: published
+                    metadata:
+                        title: Do you want to publish?
+            metadata:
+                title: Workflow to manager article
+            audit_trail: true
+            # events_to_dispatch: ~
+            # events_to_dispatch: []
+            # events_to_dispatch: ['workflow.enter']
+
+        task:
+            type: state_machine
+            supports:
+                - App\Entity\Task
+            marking_store:
+                type: method
+            places:
+                - new
+                - backlogged
+                - processing
+                - failed
+                - completed
+            transitions:
+                start_process:
+                    from: new
+                    to: processing
+                retry:
+                    from: backlogged
+                    to: processing
+                temp_error:
+                    from: processing
+                    to: backlogged
+                permanent_error:
+                    from: processing
+                    to: failed
+                complete_without_error:
+                    from: processing
+                    to: completed
+
+        straight:
+            type: workflow
+            supports:
+                - stdClass # Just a hack
+            places:
+                - a
+                - b
+                - c
+                - d
+            transitions:
+                t1:
+                    from: a
+                    to: b
+                t2:
+                    from: b
+                    to: c
+                t3:
+                    from: c
+                    to: d
+
+        round_trip:
+            type: workflow
+            supports:
+                - stdClass # Just a hack
+            places:
+                - a
+                - b
+                - c
+            transitions:
+                t1:
+                    from: a
+                    to: b
+                t2:
+                    from: b
+                    to: c
+                t3:
+                    from: c
+                    to: a
+
+        or:
+            type: workflow
+            supports:
+                - stdClass # Just a hack
+            places:
+                - a
+                - b
+                - c
+                - d
+            transitions:
+                t1:
+                    from: a
+                    to: b
+                t2:
+                    from: a
+                    to: c
+                t3:
+                    from: b
+                    to: d
+                t4:
+                    from: c
+                    to: d
+
+        and:
+            type: workflow
+            supports:
+                - stdClass # Just a hack
+            places:
+                - a
+                - b
+                - c
+                - d
+                - e
+                - f
+            transitions:
+                t1:
+                    from: a
+                    to: [ b, c ]
+                t2:
+                    from: b
+                    to: d
+                t3:
+                    from: c
+                    to: e
+                t4:
+                    from: [ d, e ]
+                    to: f
+
+        wtf:
+            type: workflow
+            supports: stdClass # Just a hack
+            places: [ a, b, c, d, e, f, g, h, i, j, k ]
+            transitions:
+                t1:
+                    from: a
+                    to: b
+                t2:
+                    from: b
+                    to: c
+                t3:
+                    from: c
+                    to: d
+                t4:
+                    from: b
+                    to: e
+                t5:
+                    from: b
+                    to: f
+                t6:
+                    from: [ c, d ]
+                    to: [ f, g ]
+                t7:
+                    from: e
+                    to: h
+                t8:
+                    from: [ e, g, i ]
+                    to: h
+                t9:
+                    from: [ f, g ]
+                    to: [ i, j ]
+                t10:
+                    from: h
+                    to: k

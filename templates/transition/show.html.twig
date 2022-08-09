@@ -1,0 +1,20 @@
+{% extends 'transition/layout.html.twig' %}
+
+{% block main %}
+<h1>State "{{ transition.name }}"</h1>
+<div class="row">
+    <div class="col-md-3">
+        <p>
+            <code>
+                AppBundle\Entity\State::name
+            </code>
+            <br/>
+            =
+            <br/>
+            from: <code>{{ transition.froms|join(', ') }}</code>
+            <br />
+            to: <code>{{ transition.tos|join(', ') }}</code>
+        </p>
+    </div>
+</div>
+{% endblock %}

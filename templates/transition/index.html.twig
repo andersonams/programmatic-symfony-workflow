@@ -1,0 +1,46 @@
+{% extends 'transition/layout.html.twig' %}
+
+{% block main %}
+    <div class="row">
+        <div class="col-md-6">
+            <h1>Transition list</h1>
+            <ul class="list-unstyled">
+                {% for transition in transitions %}
+                    <li>
+                        <a href="{{ path('transition_show', {id: transition.id}) }}">
+                            {{ transition.name }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <p>
+                            No transition found, add one?
+                        </p>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2>Add new transition</h2>
+            <form action="{{ path('transition_create') }}" method="post">
+                <div class="form-group">
+                    <label for="title">Name</label>
+                    <input type="text" id="title" name="title"
+                           value="{{ transitions ? "Transition #{(transitions|length) + 1}" : "Transition 1" }}"
+                           class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="title">From</label>
+                    <input type="text" id="from" name="from" value="" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <label for="title">To</label>
+                    <input type="text" id="to" name="to" value="" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default">create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
